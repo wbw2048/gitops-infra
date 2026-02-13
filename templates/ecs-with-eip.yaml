@@ -79,17 +79,17 @@ Resources:
           - - gitops-sg
             - Ref: ALIYUN::StackId
       SecurityGroupIngress:
-        - SourceCidrIp: 0.0.0.0/0
+        - SourceCidrIp: 140.205.11.0/24
           IpProtocol: tcp
           PortRange: '22/22'
           Priority: 1
           Description: SSH访问
-        - SourceCidrIp: 0.0.0.0/0
+        - SourceCidrIp: 140.205.11.0/24
           IpProtocol: tcp
           PortRange: '80/80'
           Priority: 1
           Description: HTTP访问
-        - SourceCidrIp: 0.0.0.0/0
+        - SourceCidrIp: 140.205.11.0/24
           IpProtocol: tcp
           PortRange: '443/443'
           Priority: 1
@@ -140,8 +140,8 @@ Outputs:
 Metadata:
   ALIYUN::ROS::Interface:
     ParameterGroups:
-    - Parameters:
-      - ZoneId
-      - InstanceType
-      - SystemDiskCategory
-      - InstancePassword
+      - Parameters:
+          - ZoneId
+          - InstanceType
+          - SystemDiskCategory
+          - InstancePassword
