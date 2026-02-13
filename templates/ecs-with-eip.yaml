@@ -1,0 +1,147 @@
+ROSTemplateFormatVersion: '2015-09-01'
+Description:
+  zh-cn: 创建ECS实例的GitOps示例模板
+  en: GitOps example template for creating ECS instance
+Parameters:
+  ZoneId:
+    Type: String
+    Label:
+      zh-cn: 可用区ID
+      en: Zone ID
+    AssociationProperty: ALIYUN::ECS::Instance::ZoneId
+    Description:
+      zh-cn: ECS实例所在的可用区ID
+      en: Zone ID where ECS instance is located
+  InstanceType:
+    Type: String
+    Label:
+      zh-cn: 实例类型
+      en: Instance Type
+    AssociationProperty: ALIYUN::ECS::Instance::InstanceType
+    AssociationPropertyMetadata:
+      ZoneId: ${ZoneId}
+    Description:
+      zh-cn: ECS实例的规格，建议根据实际需求选择
+      en: ECS instance type, recommended to choose based on actual requirements
+  SystemDiskCategory:
+    Type: String
+    Label:
+      zh-cn: 系统盘类型
+      en: System Disk Category
+    AssociationProperty: ALIYUN::ECS::Disk::SystemDiskCategory
+    AssociationPropertyMetadata:
+      ZoneId: ${ZoneId}
+      InstanceType: ${InstanceType}
+    Description:
+      zh-cn: ECS实例系统盘的云盘类型
+      en: Cloud disk type of ECS instance system disk
+  InstancePassword:
+    Type: String
+    Label:
+      zh-cn: 实例密码
+      en: Instance Password
+    AssociationProperty: ALIYUN::ECS::Instance::Password
+    NoEcho: true
+    Description:
+      zh-cn: ECS实例的登录密码，8-30个字符，必须包含大写字母、小写字母和数字
+      en: Login password of ECS instance, 8-30 characters, must contain uppercase, lowercase letters and numbers
+Resources:
+  Vpc:
+    Type: ALIYUN::ECS::VPC
+    Properties:
+      CidrBlock: 192.168.0.0/16
+      VpcName:
+        Fn::Join:
+          - '-'
+          - - gitops-vpc
+            - Ref: ALIYUN::StackId
+  VSwitch:
+    Type: ALIYUN::ECS::VSwitch
+    Properties:
+      VpcId:
+        Ref: Vpc
+      CidrBlock: 192.168.1.0/24
+      ZoneId:
+        Ref: ZoneId
+      VSwitchName:
+        Fn::Join:
+          - '-'
+          - - gitops-vswitch
+            - Ref: ALIYUN::StackId
+  SecurityGroup:
+    Type: ALIYUN::ECS::SecurityGroup
+    Properties:
+      VpcId:
+        Ref: Vpc
+      SecurityGroupName:
+        Fn::Join:
+          - '-'
+          - - gitops-sg
+            - Ref: ALIYUN::StackId
+      SecurityGroupIngress:
+        - SourceCidrIp: 0.0.0.0/0
+          IpProtocol: tcp
+          PortRange: '22/22'
+          Priority: 1
+          Description: SSH访问
+        - SourceCidrIp: 0.0.0.0/0
+          IpProtocol: tcp
+          PortRange: '80/80'
+          Priority: 1
+          Description: HTTP访问
+        - SourceCidrIp: 0.0.0.0/0
+          IpProtocol: tcp
+          PortRange: '443/443'
+          Priority: 1
+          Description: HTTPS访问
+  EcsInstance:
+    Type: ALIYUN::ECS::Instance
+    Properties:
+      InstanceType:
+        Ref: InstanceType
+      ImageId: aliyun_3_9_x64_20G_alibase_
+      SystemDiskCategory:
+        Ref: SystemDiskCategory
+      SystemDiskSize: 40
+      VpcId:
+        Ref: Vpc
+      VSwitchId:
+        Ref: VSwitch
+      SecurityGroupId:
+        Ref: SecurityGroup
+      InstanceName:
+        Fn::Join:
+          - '-'
+          - - gitops-ecs
+            - Ref: ALIYUN::StackId
+      Password:
+        Ref: InstancePassword
+      ZoneId:
+        Ref: ZoneId
+Outputs:
+  InstanceId:
+    Description: ECS实例ID
+    Value:
+      Ref: EcsInstance
+  InstancePrivateIP:
+    Description: ECS实例的私网IP地址
+    Value:
+      Fn::GetAtt:
+        - EcsInstance
+        - PrivateIp
+  VpcId:
+    Description: VPC ID
+    Value:
+      Ref: Vpc
+  SecurityGroupId:
+    Description: 安全组ID
+    Value:
+      Ref: SecurityGroup
+Metadata:
+  ALIYUN::ROS::Interface:
+    ParameterGroups:
+    - Parameters:
+      - ZoneId
+      - InstanceType
+      - SystemDiskCategory
+      - InstancePassword
