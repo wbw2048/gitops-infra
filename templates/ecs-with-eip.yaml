@@ -99,7 +99,7 @@ Resources:
     Properties:
       InstanceType:
         Ref: InstanceType
-      ImageId: aliyun_3_9_x64_20G_alibase_
+      ImageId: centos_7_04_64_20G_alibase_201701015.vhd
       SystemDiskCategory:
         Ref: SystemDiskCategory
       SystemDiskSize: 40
