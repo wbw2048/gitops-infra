@@ -3,7 +3,7 @@ template-file-path: templates/ecs-with-eip.yaml
 
 # 部署参数
 parameters:
-  ZoneId: cn-hangzhou-a
+  ZoneId: cn-hangzhou-f
   InstanceType: ecs.g6.large
   SystemDiskCategory: cloud_efficiency
   InstancePassword: YourSecurePassword123
